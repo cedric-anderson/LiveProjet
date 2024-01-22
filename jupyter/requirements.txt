@@ -1,0 +1,6 @@
+# Bibliotheque utiliser
+pandas
+plotly
+scikit-learn
+matplotlib
+numpy

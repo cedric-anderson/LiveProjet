@@ -1,0 +1,52 @@
+version: '3'
+
+services:
+
+  api-service:
+    image: api_service/ip-jupyter
+    container_name: service
+    ports:
+      - 8004:8000
+
+  prometheus:
+    image: prom/prometheus:v2.20.0
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention.time=48h'
+    restart: "no"
+   # expose:
+    #  - 9090
+
+  grafana:
+    image: grafana/grafana:7.1.1
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisionning/datasources.yml:/etc/grafana/provisionning
+    restart: "no"
+    environment:
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+
+  caddy:
+    image: caddy/caddy
+    container_name: caddy
+    volumes:
+      - ./caddy/caddyfile:/etc/caddy/caddyfile
+    environment:
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    ports:
+      - 3000:3000
+      - 9090:9090
+    restart: "no" # unless-stopped
+
+volumes:
+       prometheus_data:
+       grafana_data:
+       caddy_data:
